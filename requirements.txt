@@ -1,0 +1,13 @@
+# Minimal requirements - adjust versions as needed
+torch
+torchvision
+numpy
+pandas
+matplotlib
+scikit-learn
+pyyaml
+jupyter
+notebook
+gradio
+opencv-python
+tqdm
