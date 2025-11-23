@@ -1,77 +1,31 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.so
 
-# Virtual environments
-.env
-.venv/
-venv/
-env/
-ENV/
-
-# Python packaging
-build/
-dist/
-*.egg-info/
-pip-wheel-metadata/
-
-# Test / typecheck / coverage
-.pytest_cache/
-.mypy_cache/
-.tox/
-.coverage
-.coverage.*
-htmlcov/
-
-# Jupyter
+# Notebooks checkpoints
 .ipynb_checkpoints/
-*.nbconvert.ipynb
 
-# VS Code / JetBrains
-.vscode/
-.idea/
+# Virtual envs
+venv/
+.env/
 
-# OS files
+# Data & models (large stuff)
+data/
+models/
+runs/
+logs/
+
+# Allow source code under src/models to be tracked
+!src/models/
+!src/models/**
+
+# Allow source code under src/data to be tracked
+!src/data/
+!src/data/**
+
+# OS junk
 .DS_Store
 Thumbs.db
-
-# Logs
-logs/
-*.log
-
-# Data and model weights (ignore raw/processed data and large model artifacts)
-data/
-data/raw/
-data/processed/
-models/
-models/**/checkpoints/
-models/**/weights/
-*.ckpt
-*.pt
-*.pth
-*.h5
-*.model
-*.pb
-
-# Experiment outputs / checkpoints
-runs/
-outputs/
-checkpoints/
-!runs/.gitkeep
-
-# Secrets and environment files
-*.env
-*.pem
-*.key
-local_settings.py
-
-# Databases
-*.sqlite3
-*.db
-
