@@ -1,6 +1,0 @@
-# Explainability configuration
-gradcam:
-  target_layer: "layer4"
-  resize: [224,224]
-overlays:
-  alpha: 0.5
