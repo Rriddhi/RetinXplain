@@ -1,6 +1,28 @@
 # Python
 __pycache__/
 *.py[cod]
+
+# Virtual envs
+.venv/
+venv/
+
+# Ignore environment files with secrets
+.env
+
+# Ignore large data and model artifacts
+models/*.pt
+models/*.pth
+data/
+uploads/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+# Python
+__pycache__/
+*.py[cod]
 *.pyo
 *.pyd
 *.so

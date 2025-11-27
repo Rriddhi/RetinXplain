@@ -1,0 +1,8 @@
+# Minimal requirements (examples)
+# torch
+# torchvision
+# fastapi
+# uvicorn
+# lime
+# opencv-python
+# pillow
