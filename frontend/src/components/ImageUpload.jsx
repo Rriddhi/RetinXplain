@@ -4,11 +4,6 @@ import axios from 'axios'
 
 function ImageUpload({ onPredictionComplete, onPredictionStart, onError, isLoading }) {
   const [preview, setPreview] = useState(null)
-  const [patientMetadata, setPatientMetadata] = useState({
-    age: '',
-    duration_of_diabetes: '',
-    hba1c: ''
-  })
 
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0]
@@ -30,13 +25,6 @@ function ImageUpload({ onPredictionComplete, onPredictionStart, onError, isLoadi
     disabled: isLoading
   })
 
-  const handleMetadataChange = (field, value) => {
-    setPatientMetadata(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
   const handleSubmit = async () => {
     if (acceptedFiles.length === 0) {
       onError('Please select an image first')
@@ -47,19 +35,9 @@ function ImageUpload({ onPredictionComplete, onPredictionStart, onError, isLoadi
 
     const formData = new FormData()
     formData.append('file', acceptedFiles[0])
-    
-    if (patientMetadata.age) {
-      formData.append('age', patientMetadata.age)
-    }
-    if (patientMetadata.duration_of_diabetes) {
-      formData.append('duration_of_diabetes', patientMetadata.duration_of_diabetes)
-    }
-    if (patientMetadata.hba1c) {
-      formData.append('hba1c', patientMetadata.hba1c)
-    }
 
     try {
-      const response = await axios.post('/predict', formData, {
+      const response = await axios.post('/api/dr/predict', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -102,55 +80,6 @@ function ImageUpload({ onPredictionComplete, onPredictionStart, onError, isLoadi
             <p className="text-xs mt-2">Supports: JPG, PNG</p>
           </div>
         )}
-      </div>
-
-      <div className="mt-6 space-y-4">
-        <h3 className="text-sm font-semibold text-clinical-700">Patient Metadata (Optional)</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-clinical-700 mb-1">
-              Age
-            </label>
-            <input
-              type="number"
-              value={patientMetadata.age}
-              onChange={(e) => handleMetadataChange('age', e.target.value)}
-              placeholder="Years"
-              className="w-full px-3 py-2 border border-clinical-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-clinical-700 mb-1">
-              Diabetes Duration
-            </label>
-            <input
-              type="number"
-              value={patientMetadata.duration_of_diabetes}
-              onChange={(e) => handleMetadataChange('duration_of_diabetes', e.target.value)}
-              placeholder="Years"
-              className="w-full px-3 py-2 border border-clinical-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-clinical-700 mb-1">
-              HbA1c (%)
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              value={patientMetadata.hba1c}
-              onChange={(e) => handleMetadataChange('hba1c', e.target.value)}
-              placeholder="7.5"
-              className="w-full px-3 py-2 border border-clinical-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-          </div>
-        </div>
       </div>
 
       <button

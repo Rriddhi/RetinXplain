@@ -4,14 +4,15 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     port: 5000,
     allowedHosts: true,
     proxy: {
-      '/predict': 'http://localhost:8000',
-      '/feedback': 'http://localhost:8000',
-      '/stats': 'http://localhost:8000',
-      '/static': 'http://localhost:8000'
+      '/api': 'http://localhost:8001',
+      '/predict': 'http://localhost:8001',
+      '/feedback': 'http://localhost:8001',
+      '/stats': 'http://localhost:8001',
+      '/static': 'http://localhost:8001'
     }
   }
 })

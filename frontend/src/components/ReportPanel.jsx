@@ -79,43 +79,24 @@ function ReportPanel({ result }) {
           </p>
         </div>
 
-        {(result.gradcam_url || result.lime_url) && (
+        {result.gradcam_url && (
           <div>
-            <h3 className="text-sm font-semibold text-clinical-700 mb-2">Explainability Visualizations</h3>
+            <h3 className="text-sm font-semibold text-clinical-700 mb-2">Explainability Visualization</h3>
             <p className="text-xs text-clinical-500 mb-3">
-              Two methods show which regions influenced the AI's decision
+              Grad-CAM++ shows which regions influenced the AI's decision
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {result.gradcam_url && (
-                <div className="border-2 border-clinical-200 rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-red-500 to-yellow-500 text-white px-3 py-2 text-sm font-semibold">
-                    Grad-CAM++
-                  </div>
-                  <img 
-                    src={result.gradcam_url} 
-                    alt="Grad-CAM++ Heatmap" 
-                    className="w-full"
-                  />
-                  <p className="text-xs text-clinical-500 p-2 bg-clinical-50">
-                    Heat colors show high-attention regions
-                  </p>
-                </div>
-              )}
-              {result.lime_url && (
-                <div className="border-2 border-clinical-200 rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-3 py-2 text-sm font-semibold">
-                    LIME
-                  </div>
-                  <img 
-                    src={result.lime_url} 
-                    alt="LIME Explanation" 
-                    className="w-full"
-                  />
-                  <p className="text-xs text-clinical-500 p-2 bg-clinical-50">
-                    Highlighted segments support the prediction
-                  </p>
-                </div>
-              )}
+            <div className="border-2 border-clinical-200 rounded-lg overflow-hidden">
+              <div className="bg-gradient-to-r from-red-500 to-yellow-500 text-white px-3 py-2 text-sm font-semibold">
+                Grad-CAM++
+              </div>
+              <img 
+                src={result.gradcam_url} 
+                alt="Grad-CAM++ Heatmap" 
+                className="max-w-full h-auto mx-auto"
+              />
+              <p className="text-xs text-clinical-500 p-2 bg-clinical-50">
+                Heat colors show high-attention regions
+              </p>
             </div>
           </div>
         )}
