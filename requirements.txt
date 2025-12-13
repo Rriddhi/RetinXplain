@@ -1,8 +1,22 @@
-# Minimal requirements (examples)
-# torch
-# torchvision
-# fastapi
-# uvicorn
-# lime
-# opencv-python
-# pillow
+# Core ML Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# API Server
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+
+# Image Processing
+pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0,<2.0.0
+
+# Explainability
+grad-cam>=1.4.0
+lime>=0.2.0
+scikit-image>=0.21.0
+
+# Optional: For LLM explainer (if needed)
+# openai>=1.0.0  # Uncomment if using OpenAI API
+# anthropic>=0.3.0  # Uncomment if using Anthropic API

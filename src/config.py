@@ -1,7 +1,36 @@
-import os
+from pathlib import Path
+import torch
 
-# Simple config placeholders. Edit as needed.
-ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-MODEL_PATH = os.environ.get("MODEL_PATH", os.path.join(ROOT_DIR, "models", "dr_efficientnet_b4_best.pt"))
-IMAGE_SIZE = (512, 512)
-CLASS_NAMES = ["No_DR", "Mild", "Moderate", "Severe", "Proliferative"]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+# ResNet50 model configuration
+RESNET50_MODEL_PATH = PROJECT_ROOT / "models" / "resnet50_best_cleaned.pt"
+UPLOAD_ROOT = PROJECT_ROOT / "uploads"
+
+# Image configuration
+IMG_SIZE = 224  # ResNet50 standard input size
+IMG_RESIZE = 256  # Resize before center crop
+NUM_CLASSES = 5
+CLASS_NAMES = {
+    0: "No DR",
+    1: "Mild",
+    2: "Moderate",
+    3: "Severe",
+    4: "Proliferative DR"
+}
+
+# ImageNet normalization constants
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
+
+# Device selection (prioritize MPS for Apple Silicon, then CUDA, then CPU)
+if torch.backends.mps.is_available():
+    DEVICE = torch.device("mps")
+elif torch.cuda.is_available():
+    DEVICE = torch.device("cuda")
+else:
+    DEVICE = torch.device("cpu")
+
+# LLM config (fill in from .env)
+LLM_PROVIDER = "openai"   # or whatever
+LLM_MODEL_NAME = "gpt-4o-mini"

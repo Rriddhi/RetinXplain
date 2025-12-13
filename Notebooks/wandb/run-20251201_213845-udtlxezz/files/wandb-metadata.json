@@ -1,0 +1,37 @@
+{
+  "os": "macOS-26.0.1-arm64-arm-64bit",
+  "python": "CPython 3.11.14",
+  "startedAt": "2025-12-02T02:38:45.564054Z",
+  "program": "/Users/smridhipatwari/Projects/retinxplain/Notebooks/unet_RetinXplain.ipynb",
+  "codePath": "/Users/smridhipatwari/Projects/retinxplain/Notebooks/unet_RetinXplain.ipynb",
+  "codePathLocal": "unet_RetinXplain.ipynb",
+  "git": {
+    "remote": "https://github.com/Rriddhi/RetinXplain.git",
+    "commit": "cc01735c25644e67229e55719dcea426b698a57c"
+  },
+  "email": "smridhip@andrew.cmu.edu",
+  "root": "/Users/smridhipatwari/Projects/retinxplain/Notebooks",
+  "host": "Smridhis-MacBook-Pro-6.local",
+  "executable": "/opt/anaconda3/envs/retinxplain/bin/python",
+  "cpu_count": 12,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "994662584320",
+      "used": "360076742656"
+    }
+  },
+  "memory": {
+    "total": "25769803776"
+  },
+  "apple": {
+    "name": "Apple M4 Pro",
+    "ecpuCores": 4,
+    "pcpuCores": 8,
+    "gpuCores": 16,
+    "memoryGb": 24,
+    "swapTotalBytes": "44023414784",
+    "ramTotalBytes": "25769803776"
+  },
+  "writerId": "1jgih5e45eyro2vbf9cqmn6v2pyq4q5b"
+}

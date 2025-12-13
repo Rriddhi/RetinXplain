@@ -1,0 +1,108 @@
+_wandb:
+    value:
+        cli_version: 0.23.0
+        e:
+            eekgwbc3aff6zednommw4skt0821plod:
+                apple:
+                    ecpuCores: 4
+                    gpuCores: 16
+                    memoryGb: 24
+                    name: Apple M4 Pro
+                    pcpuCores: 8
+                    ramTotalBytes: "25769803776"
+                    swapTotalBytes: "37580963840"
+                codePath: /Users/smridhipatwari/Projects/retinxplain/Notebooks/resnet50_RetinXplain_cleaned.ipynb
+                codePathLocal: resnet50_RetinXplain_cleaned.ipynb
+                cpu_count: 12
+                cpu_count_logical: 12
+                disk:
+                    /:
+                        total: "994662584320"
+                        used: "351976628224"
+                email: smridhip@andrew.cmu.edu
+                executable: /opt/anaconda3/envs/retinxplain/bin/python
+                git:
+                    commit: cc01735c25644e67229e55719dcea426b698a57c
+                    remote: https://github.com/Rriddhi/RetinXplain.git
+                host: Smridhis-MacBook-Pro-6.local
+                memory:
+                    total: "25769803776"
+                os: macOS-26.0.1-arm64-arm-64bit
+                program: /Users/smridhipatwari/Projects/retinxplain/Notebooks/resnet50_RetinXplain_cleaned.ipynb
+                python: CPython 3.11.14
+                root: /Users/smridhipatwari/Projects/retinxplain/Notebooks
+                startedAt: "2025-12-01T06:22:34.504345Z"
+                writerId: eekgwbc3aff6zednommw4skt0821plod
+        m: []
+        python_version: 3.11.14
+        t:
+            "1":
+                - 1
+                - 5
+                - 41
+                - 53
+            "2":
+                - 1
+                - 5
+                - 41
+                - 53
+            "3":
+                - 2
+                - 16
+            "4": 3.11.14
+            "5": 0.23.0
+            "8":
+                - 1
+            "12": 0.23.0
+            "13": darwin-arm64
+        visualize:
+            confusion_matrix:
+                panel_config:
+                    fieldSettings:
+                        Actual: Actual
+                        Predicted: Predicted
+                        nPredictions: nPredictions
+                    panelDefId: wandb/confusion_matrix/v1
+                    stringSettings:
+                        title: Confusion Matrix Curve
+                    transform:
+                        name: tableWithLeafColNames
+                    userQuery:
+                        queryFields:
+                            - args:
+                                - name: runSets
+                                  value: ${runSets}
+                              fields:
+                                - fields: []
+                                  name: id
+                                - fields: []
+                                  name: name
+                                - fields: []
+                                  name: _defaultColorIndex
+                                - args:
+                                    - name: tableKey
+                                      value: confusion_matrix_table
+                                  fields: []
+                                  name: summaryTable
+                              name: runSets
+                panel_type: Vega2
+batch_size:
+    value: 32
+epochs:
+    value: 30
+focal_gamma:
+    value: 2
+image_size:
+    value: 224
+learning_rate:
+    value: 0.0003
+model:
+    value: ResNet50
+num_classes:
+    value: 5
+optimizer:
+    value: AdamW
+scheduler:
+    value: CosineAnnealingLR
+weight_decay:
+    value: 0.0001

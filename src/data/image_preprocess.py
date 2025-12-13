@@ -1,10 +1,10 @@
-"""Helpers for loading a PIL image and converting to model-ready tensor.
-
-This is a small stub; replace with torchvision transforms / normalization used by your model.
-"""
+from pathlib import Path
 from PIL import Image
-import numpy as np
+import torch
 
-def load_image_to_array(path: str):
-    img = Image.open(path).convert("RGB")
-    return np.array(img)
+from src.data.transforms import validation_transform
+
+def load_and_preprocess(image_path: Path) -> torch.Tensor:
+    img = Image.open(image_path).convert("RGB")
+    t = validation_transform(img)
+    return t.unsqueeze(0)  # [1, C, H, W]

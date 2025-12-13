@@ -1,0 +1,45 @@
+_wandb:
+    value:
+        cli_version: 0.23.0
+        m: []
+        python_version: 3.11.14
+        t:
+            "1":
+                - 1
+                - 5
+                - 41
+                - 53
+            "2":
+                - 1
+                - 5
+                - 41
+                - 53
+            "3":
+                - 2
+                - 16
+            "4": 3.11.14
+            "5": 0.23.0
+            "8":
+                - 1
+            "12": 0.23.0
+            "13": darwin-arm64
+batch_size:
+    value: 32
+epochs:
+    value: 30
+focal_gamma:
+    value: 2
+image_size:
+    value: 380
+learning_rate:
+    value: 0.0003
+model:
+    value: EfficientNet-B4
+num_classes:
+    value: 5
+optimizer:
+    value: AdamW
+scheduler:
+    value: CosineAnnealingLR
+weight_decay:
+    value: 0.0001
