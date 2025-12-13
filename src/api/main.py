@@ -31,10 +31,10 @@ def health():
 
 @app.post("/api/dr/predict")
 async def predict_dr(file: UploadFile = File(...)):
-    """Predict DR classification with explainability visualizations.
+    """Predict DR classification with Grad-CAM++ explainability visualization.
     
     This endpoint uses the ResNet50 model trained for DR classification.
-    It returns predictions along with Grad-CAM++ and LIME overlays.
+    It returns predictions along with Grad-CAM++ overlay.
     
     Args:
         file: Uploaded fundus image (multipart/form-data)
@@ -46,8 +46,6 @@ async def predict_dr(file: UploadFile = File(...)):
         - confidence: Confidence score
         - probs: List of probabilities for all 5 classes
         - gradcam_overlay_path: Relative path to Grad-CAM++ overlay
-        - lime_overlay_path: Relative path to LIME overlay
-        - shap_overlay_path: Relative path to SHAP overlay
     """
     # 1) Save original upload
     today = datetime.date.today().isoformat()

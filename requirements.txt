@@ -14,9 +14,7 @@ numpy>=1.24.0,<2.0.0
 
 # Explainability
 grad-cam>=1.4.0
-lime>=0.2.0
-scikit-image>=0.21.0
 
 # Optional: For LLM explainer (if needed)
+anthropic>=0.3.0  # For Anthropic API (default)
 # openai>=1.0.0  # Uncomment if using OpenAI API for LLM explanations
-# anthropic>=0.3.0  # Uncomment if using Anthropic API

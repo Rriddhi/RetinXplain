@@ -25,7 +25,13 @@ def generate_explanation(
     """
     # Try to use LLM if API key is available
     try:
-        if LLM_PROVIDER == "openai":
+        if LLM_PROVIDER == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            if api_key:
+                return _generate_with_anthropic(
+                    pred_class_idx, pred_class_name, confidence, probs, clinical_notes
+                )
+        elif LLM_PROVIDER == "openai":
             api_key = os.getenv("OPENAI_API_KEY")
             if api_key:
                 return _generate_with_openai(
@@ -36,6 +42,85 @@ def generate_explanation(
     
     # Fallback to template-based explanation
     return _generate_template_explanation(pred_class_idx, pred_class_name, confidence, probs)
+
+
+def _generate_with_anthropic(
+    pred_class_idx: int,
+    pred_class_name: str,
+    confidence: float,
+    probs: list,
+    clinical_notes: Optional[str]
+) -> Dict[str, str]:
+    """Generate explanations using Anthropic (Claude) API."""
+    try:
+        from anthropic import Anthropic
+        
+        client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        
+        # Build prompt for clinician summary
+        clinician_prompt = f"""You are a medical AI assistant. Provide a concise clinical summary for a diabetic retinopathy screening result.
+
+Prediction: {pred_class_name} (Grade {pred_class_idx}/4)
+Confidence: {confidence:.1%}
+Probabilities: {dict(zip([CLASS_NAMES[i] for i in range(5)], [f"{p:.1%}" for p in probs]))}
+
+Provide a brief (2-3 sentences) clinical summary suitable for healthcare professionals, focusing on:
+- The severity assessment
+- Clinical significance
+- Typical findings for this grade
+"""
+        
+        # Build prompt for patient summary
+        patient_prompt = f"""You are a medical AI assistant. Provide a patient-friendly explanation for a diabetic retinopathy screening result.
+
+Prediction: {pred_class_name} (Grade {pred_class_idx}/4)
+Confidence: {confidence:.1%}
+
+Provide a clear, empathetic explanation (3-4 sentences) suitable for patients, using simple language. Explain:
+- What the result means in plain terms
+- What they should do next
+- Reassurance if appropriate
+"""
+        
+        # Generate clinician summary
+        clinician_message = client.messages.create(
+            model=LLM_MODEL_NAME,
+            max_tokens=200,
+            temperature=0.3,
+            messages=[
+                {"role": "user", "content": clinician_prompt}
+            ]
+        )
+        
+        # Generate patient summary
+        patient_message = client.messages.create(
+            model=LLM_MODEL_NAME,
+            max_tokens=200,
+            temperature=0.3,
+            messages=[
+                {"role": "user", "content": patient_prompt}
+            ]
+        )
+        
+        # Extract text from Anthropic response (it's a list of TextBlock objects)
+        clinician_text = ""
+        for block in clinician_message.content:
+            if hasattr(block, 'text'):
+                clinician_text += block.text
+        
+        patient_text = ""
+        for block in patient_message.content:
+            if hasattr(block, 'text'):
+                patient_text += block.text
+        
+        return {
+            "clinician_summary": clinician_text.strip(),
+            "patient_summary": patient_text.strip()
+        }
+    except ImportError:
+        raise ImportError("anthropic package not installed. Install with: pip install anthropic")
+    except Exception as e:
+        raise Exception(f"Anthropic API error: {e}")
 
 
 def _generate_with_openai(

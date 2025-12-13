@@ -2,16 +2,40 @@
 
 AI-Powered Diabetic Retinopathy (DR) Screening System with Explainability
 
-RetinXplain is a comprehensive deep learning system for automated diabetic retinopathy classification from fundus images. It provides accurate DR grading (0-4) along with multiple explainability visualizations (Grad-CAM++, LIME, SHAP) to help clinicians understand model predictions.
+RetinXplain is a comprehensive deep learning system for automated diabetic retinopathy classification from fundus images. It provides accurate DR grading (0-4) along with Grad-CAM++ explainability visualizations to help clinicians understand model predictions.
 
 ## Features
 
 - **DR Classification**: 5-class classification (No DR, Mild, Moderate, Severe, Proliferative DR)
-- **Explainability**: Multiple visualization methods (Grad-CAM++, LIME, SHAP overlays)
+- **Explainability**: Grad-CAM visualization overlays showing model attention
 - **Modern Web Interface**: React-based frontend with drag-and-drop image upload
 - **RESTful API**: FastAPI backend with automatic documentation
 - **LLM Explanations**: AI-generated text explanations of predictions (optional)
 - **Feedback System**: Collect and log user feedback for model improvement
+
+## Screenshots
+
+### Main Interface
+
+![Upload Interface](docs/images/upload-interface.png)
+
+The clean, modern interface for uploading fundus images with drag-and-drop support.
+
+### Screening Results
+
+![Screening Results - Moderate](docs/images/results-moderate.png)
+
+Example screening results showing Moderate DR (Grade 2/4) with 89.5% confidence, including clinician summary and patient-friendly explanation.
+
+![Screening Results - Severe](docs/images/results-severe.png)
+
+Example screening results showing Severe DR (Grade 3/4) with urgent referral recommendation.
+
+### Explainability Visualization
+
+![Grad-CAM Visualization](docs/images/gradcam-visualization.png)
+
+Grad-CAM heatmap overlay showing which regions of the fundus image influenced the AI's decision. Red/orange/yellow areas indicate high attention regions, while blue/purple areas show lower attention.
 
 ## Project Structure
 
@@ -92,7 +116,7 @@ retinxplain/
 3. View the prediction results:
    - DR grade and confidence
    - Probability distribution across all classes
-   - Explainability overlays (Grad-CAM++, LIME, SHAP)
+   - Grad-CAM++ explainability overlay
    - AI-generated text explanation (if configured)
 4. Provide feedback on the prediction quality
 
@@ -116,9 +140,7 @@ Predict DR classification from a fundus image.
   "probs": [0.05, 0.08, 0.87, 0.00, 0.00],
   "artifacts": {
     "original_image_path": "2024-01-15/abc123_original.png",
-    "gradcam_overlay_path": "2024-01-15/abc123_gradcam.png",
-    "lime_overlay_path": "2024-01-15/abc123_lime.png",
-    "shap_overlay_path": "2024-01-15/abc123_shap.png"
+    "gradcam_overlay_path": "2024-01-15/abc123_gradcam.png"
   }
 }
 ```
@@ -144,9 +166,11 @@ Health check endpoint.
 
 ## Explainability Methods
 
-1. **Grad-CAM++**: Gradient-weighted Class Activation Mapping showing important regions
-2. **LIME**: Local Interpretable Model-agnostic Explanations with superpixel analysis
-3. **SHAP**: SHapley Additive exPlanations for feature importance
+**Grad-CAM (Gradient-weighted Class Activation Mapping)**: Our custom implementation generates heatmaps showing important regions that influenced the model's prediction. The visualization uses a color gradient from blue (low attention) to red/yellow (high attention), allowing clinicians to understand which areas of the fundus image were most significant for the DR classification.
+
+![Grad-CAM Example](docs/images/gradcam-visualization.png)
+
+The heatmap clearly highlights pathological regions such as hemorrhages, exudates, and microaneurysms that contribute to the model's decision, providing transparency and interpretability for clinical use.
 
 ## Development
 
@@ -189,5 +213,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **PyTorch** and **torchvision** for the deep learning framework and pre-trained models
 - **FastAPI** for the modern, fast web framework
 - **React** and **Vite** for the frontend framework and build tool
-- **Grad-CAM**, **LIME**, and **SHAP** libraries for explainability implementations
+- **Grad-CAM** library for explainability implementations
 - The medical imaging and deep learning research community for foundational work in diabetic retinopathy classification

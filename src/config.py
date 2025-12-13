@@ -1,5 +1,10 @@
 from pathlib import Path
 import torch
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -32,5 +37,5 @@ else:
     DEVICE = torch.device("cpu")
 
 # LLM config (fill in from .env)
-LLM_PROVIDER = "openai"   # or whatever
-LLM_MODEL_NAME = "gpt-4o-mini"
+LLM_PROVIDER = "anthropic"   # Options: "anthropic" or "openai"
+LLM_MODEL_NAME = "claude-3-5-sonnet-20241022"  # Anthropic model name
