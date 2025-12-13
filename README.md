@@ -155,9 +155,6 @@ Health check endpoint.
 ```bash
 # Run with auto-reload
 uvicorn src.api.main:app --reload
-
-# Run tests (if available)
-pytest
 ```
 
 ### Frontend Development
@@ -185,20 +182,12 @@ See `.env.example` for required environment variables:
 
 ## License
 
-[Add your license here]
-
-## Citation
-
-If you use this project in your research, please cite:
-
-```bibtex
-[Add citation information]
-```
-
-## Contributing
-
-[Add contribution guidelines]
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
-[Add acknowledgments]
+- **PyTorch** and **torchvision** for the deep learning framework and pre-trained models
+- **FastAPI** for the modern, fast web framework
+- **React** and **Vite** for the frontend framework and build tool
+- **Grad-CAM**, **LIME**, and **SHAP** libraries for explainability implementations
+- The medical imaging and deep learning research community for foundational work in diabetic retinopathy classification
