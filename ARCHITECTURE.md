@@ -1,251 +1,372 @@
-# RetinXplain Architecture Overview
+# RetinXplain Architecture
 
-This document explains how the RetinXplain project is structured and how all the components work together.
+This document describes the architecture and design of the RetinXplain system.
 
-## Project Structure
+## System Overview
+
+RetinXplain is a full-stack web application for diabetic retinopathy classification with explainability features. It consists of:
+
+1. **Backend**: FastAPI-based REST API serving PyTorch models
+2. **Frontend**: React-based web interface for image upload and result visualization
+3. **Model**: ResNet50-based classifier with explainability modules
+
+## Architecture Diagram
 
 ```
-retinxplain/
-├── src/                    # Python backend (FastAPI)
-│   ├── api/               # API endpoints
-│   ├── inference/         # AI model loading and prediction
-│   ├── data/              # Image preprocessing
-│   └── utils/             # Utilities
-└── web/ohif/              # OHIF Viewer frontend
-    └── platform/app/      # Main OHIF application
+┌─────────────────┐
+│   React Frontend │
+│   (Port 5000)    │
+│                  │
+│  - Image Upload  │
+│  - Results View  │
+│  - Overlays      │
+└────────┬─────────┘
+         │ HTTP/REST
+         │
+┌────────▼─────────┐
+│  FastAPI Backend  │
+│   (Port 8000)     │
+│                   │
+│  - /api/dr/predict│
+│  - /health        │
+└────────┬──────────┘
+         │
+    ┌────┴────┐
+    │         │
+┌───▼───┐ ┌──▼──────┐
+│Model  │ │Explain │
+│Loader │ │Modules │
+└───┬───┘ └───┬────┘
+    │         │
+┌───▼─────────▼───┐
+│  PyTorch Model  │
+│   (ResNet50)    │
+└─────────────────┘
 ```
 
-## How OHIF Viewer Works
+## Backend Architecture
 
-### 1. **Configuration System** (`local.js`)
+### Directory Structure
 
-The configuration file (`web/ohif/platform/app/public/config/local.js`) is the **entry point** that controls everything:
+```
+src/
+├── api/
+│   └── main.py              # FastAPI app, route handlers
+├── inference/
+│   ├── model_loader.py      # Model loading and initialization
+│   ├── predictor.py         # Main prediction pipeline
+│   ├── explainability.py    # Grad-CAM++, LIME, SHAP implementations
+│   └── llm_explainer.py     # LLM-based text explanations (optional)
+├── data/
+│   ├── image_preprocess.py  # Image preprocessing utilities
+│   └── transforms.py        # PyTorch transforms
+├── utils/
+│   ├── image_io.py          # Image I/O operations
+│   └── logging_utils.py     # Logging configuration
+└── config.py                # Configuration constants
+```
 
-- **Location**: `web/ohif/platform/app/public/config/local.js`
-- **How it's loaded**: 
-  - At build time, webpack copies this file to `dist/app-config.js`
-  - At runtime, `index.js` reads `window.config` from this file
-  - The `APP_CONFIG` environment variable determines which config file to use
+### Core Components
+
+#### 1. API Layer (`src/api/main.py`)
+
+**Responsibilities:**
+- Handle HTTP requests
+- File upload processing
+- Response formatting
+- CORS configuration
+
+**Key Endpoints:**
+- `POST /api/dr/predict`: Main prediction endpoint
+- `GET /health`: Health check
 
 **Flow:**
 ```
-Build Process:
-  APP_CONFIG=config/local.js 
-  → webpack copies local.js → dist/app-config.js
-  → HTML loads app-config.js → window.config is set
-
-Runtime:
-  index.js → reads window.config → passes to App.tsx → appInit.js
+1. Receive image upload
+2. Save to uploads/ directory
+3. Call predictor module
+4. Format and return results
 ```
 
-### 2. **Application Initialization** (`appInit.js`)
+#### 2. Inference Pipeline (`src/inference/predictor.py`)
 
-Located at: `web/ohif/platform/app/src/appInit.js`
+**Responsibilities:**
+- Orchestrate prediction workflow
+- Coordinate model inference and explainability
+- Save generated overlays
 
-**What it does:**
-1. Creates core managers (Commands, Services, Extensions, Hotkeys)
-2. Registers services (Measurement, DisplaySet, Toolbar, etc.)
-3. Loads extensions from `pluginConfig.json` + config extensions
-4. Loads modes from `pluginConfig.json` + config modes
-5. Registers data sources
-
-**Key Code:**
-```javascript
-// Loads extensions (image rendering, UI components)
-const loadedExtensions = await loadModules([...defaultExtensions, ...appConfig.extensions]);
-
-// Registers data sources (where images come from)
-await extensionManager.registerExtensions(loadedExtensions, appConfig.dataSources);
-
-// Loads modes (how images are displayed)
-const loadedModes = await loadModules([...appConfig.modes, ...defaultModes]);
+**Workflow:**
+```
+1. Load and preprocess image
+2. Run model inference
+3. Generate explainability overlays (Grad-CAM++, LIME, SHAP)
+4. Return results with file paths
 ```
 
-### 3. **Extensions System**
+#### 3. Model Loader (`src/inference/model_loader.py`)
 
-**Location**: `web/ohif/platform/app/pluginConfig.json`
+**Responsibilities:**
+- Load trained PyTorch model
+- Initialize model architecture
+- Handle device selection (CPU/CUDA/MPS)
+- Cache model in memory
 
-Extensions are **pre-built modules** that add functionality:
+**Features:**
+- Lazy loading (loads on first use)
+- Device auto-detection
+- Model state validation
 
-- **@ohif/extension-default**: Core UI (study list, panels, navigation)
-- **@ohif/extension-cornerstone**: Image rendering engine (displays DICOM images)
-- **@ohif/extension-measurement-tracking**: Measurement tools
-- Others: PDF viewer, video viewer, segmentation, etc.
+#### 4. Explainability Module (`src/inference/explainability.py`)
 
-**How they're linked:**
-1. `pluginConfig.json` lists available extensions
-2. Build process (`writePluginImportsFile.js`) generates `pluginImports.js`
-3. `pluginImports.js` imports all extensions and adds them to `window`
-4. `appInit.js` loads them dynamically
+**Responsibilities:**
+- Generate Grad-CAM++ overlays
+- Generate LIME explanations
+- Generate SHAP visualizations
+- Save overlay images
 
-### 4. **Modes System**
+**Methods:**
+- `generate_gradcam`: Gradient-weighted activation maps
+- `generate_lime`: Local interpretable explanations
+- `generate_shap`: SHapley additive explanations
 
-**Location**: `web/ohif/platform/app/pluginConfig.json`
+#### 5. Data Preprocessing (`src/data/`)
 
-Modes define **how images are displayed** and what tools are available:
+**Components:**
+- `image_preprocess.py`: Image loading, resizing, normalization
+- `transforms.py`: PyTorch transform pipelines
 
-- **@ohif/mode-basic**: Simple image viewer (perfect for DR images)
-- **@ohif/mode-longitudinal**: Compare studies over time
-- **@ohif/mode-segmentation**: Segmentation tools
-- **@ohif/mode-microscopy**: Microscopy images
+**Preprocessing Steps:**
+1. Resize to 256x256
+2. Center crop to 224x224
+3. Convert to tensor
+4. Normalize with ImageNet statistics
 
-**How they work:**
-- Each mode has a `modeFactory` function
-- The mode defines viewport layouts, toolbar buttons, hanging protocols
-- Your config specifies which modes to enable
+## Frontend Architecture
 
-### 5. **Data Sources**
-
-Data sources define **where images come from**:
-
-**Types:**
-- **dicomlocal**: Local file loading (drag & drop DICOM files)
-- **dicomjson**: Load from JSON format
-- **dicomweb**: Load from DICOMWeb server (QIDO-RS, WADO-RS)
-
-**How they work:**
-```javascript
-{
-  namespace: '@ohif/extension-default.dataSourcesModule.dicomlocal',
-  sourceName: 'dicomlocal',
-  configuration: { friendlyName: 'Local DICOM Files' }
-}
-```
-
-The extension provides the data source module, which handles:
-- File loading
-- DICOM parsing
-- Study/series organization
-- Image retrieval
-
-### 6. **Build Process**
-
-**Webpack Configuration**: `web/ohif/platform/app/.webpack/webpack.pwa.js`
-
-**Steps:**
-1. Reads `APP_CONFIG` environment variable
-2. Copies selected config file to `dist/app-config.js`
-3. Bundles all extensions and modes
-4. Generates `pluginImports.js` from `pluginConfig.json`
-5. Creates production bundle
-
-**Key files:**
-- `webpack.pwa.js`: Main webpack config
-- `writePluginImportsFile.js`: Generates plugin imports
-- `pluginConfig.json`: Lists available extensions/modes
-
-### 7. **Runtime Flow**
+### Directory Structure
 
 ```
-1. Browser loads index.html
-   ↓
-2. HTML loads app-config.js (your local.js)
-   ↓
-3. index.js reads window.config
-   ↓
-4. index.js calls App.tsx with config
-   ↓
-5. App.tsx calls appInit.js
-   ↓
-6. appInit.js:
-   - Creates managers
-   - Loads extensions
-   - Loads modes
-   - Registers data sources
-   ↓
-7. App.tsx renders React components
-   ↓
-8. User interacts → loads images → displays in viewport
+frontend/
+├── src/
+│   ├── App.jsx              # Main application component
+│   ├── components/
+│   │   ├── ImageUpload.jsx  # Image upload with drag-and-drop
+│   │   ├── ReportPanel.jsx  # Prediction results display
+│   │   └── FeedbackPanel.jsx # User feedback form
+│   ├── main.jsx            # React entry point
+│   └── index.css           # Global styles
+├── package.json
+└── vite.config.js          # Vite build configuration
 ```
 
-## File Loading Flow (for DR Images)
-
-When a user loads a DR image:
+### Component Hierarchy
 
 ```
-1. User drags DICOM file or clicks "Load"
-   ↓
-2. dicomlocal data source receives file
-   ↓
-3. FileLoaderService parses DICOM file
-   ↓
-4. Creates study/series/instance structure
-   ↓
-5. DisplaySetService organizes images
-   ↓
-6. Cornerstone extension renders image
-   ↓
-7. Image appears in viewport
+App
+├── Header
+├── ImageUpload
+│   └── Dropzone
+├── ReportPanel
+│   ├── Prediction Summary
+│   ├── Probability Chart
+│   └── Overlay Images
+└── FeedbackPanel
+    └── Feedback Form
 ```
 
-## Key Directories Explained
+### Key Components
 
-### `web/ohif/platform/app/`
-- **Main application code**
-- `src/`: React components, routes, services
-- `public/config/`: Configuration files
-- `.webpack/`: Build configuration
+#### 1. App.jsx
+- Main application state management
+- Coordinates between upload, prediction, and feedback
+- Error handling
 
-### `web/ohif/platform/core/`
-- **Core OHIF framework**
-- Services, managers, utilities
-- Shared across all OHIF apps
+#### 2. ImageUpload.jsx
+- Drag-and-drop file upload
+- Image preview
+- API integration for prediction
 
-### `web/ohif/extensions/`
-- **Extension packages**
-- Each extension is a separate package
-- Can be enabled/disabled via config
+#### 3. ReportPanel.jsx
+- Displays prediction results
+- Shows DR grade and confidence
+- Renders explainability overlays
+- Probability distribution visualization
 
-### `web/ohif/modes/`
-- **Mode packages**
-- Each mode defines a viewing experience
-- Can be enabled/disabled via config
+#### 4. FeedbackPanel.jsx
+- Collects user feedback
+- Submits feedback to backend
+- Resets state after submission
 
-## How to Customize
+## Data Flow
 
-### Add a new data source:
-1. Add to `dataSources` array in `local.js`
-2. Configure the endpoint/behavior
+### Prediction Flow
 
-### Add a new extension:
-1. Install package: `yarn add @ohif/extension-name`
-2. Add to `pluginConfig.json`
-3. Add to `extensions` array in `local.js`
+```
+1. User uploads image (Frontend)
+   ↓
+2. POST /api/dr/predict with image file (Backend)
+   ↓
+3. Save image to uploads/ directory
+   ↓
+4. Load and preprocess image
+   ↓
+5. Run model inference
+   ↓
+6. Generate explainability overlays
+   ↓
+7. Save overlays to uploads/
+   ↓
+8. Return JSON response with paths
+   ↓
+9. Frontend displays results and overlays
+```
 
-### Change UI:
-1. Modify `ui` section in `local.js`
-2. Customize panels, toolbar buttons
-3. Or create custom React components
+### File Storage
 
-### Connect to your backend:
-1. Add DICOMWeb data source pointing to your API
-2. Or use `dicomjson` to load from your API's JSON response
-3. Configure endpoints in data source configuration
+```
+uploads/
+└── YYYY-MM-DD/
+    ├── {uuid}_original.png
+    ├── {uuid}_gradcam.png
+    ├── {uuid}_lime.png
+    └── {uuid}_shap.png
+```
 
-## Environment Variables
+## Model Architecture
 
-- **APP_CONFIG**: Which config file to use (default: `config/default.js`)
-- **NODE_ENV**: `development` or `production`
-- **OHIF_PORT**: Dev server port (default: 3000)
-- **PUBLIC_URL**: Base URL path (default: `/`)
+### ResNet50 Configuration
 
-## Summary
+- **Base Model**: torchvision.models.resnet50
+- **Input**: 3-channel RGB images, 224x224
+- **Output**: 5-class logits (DR grades 0-4)
+- **Modifications**: Final fully-connected layer changed to 5 outputs
 
-**The config file (`local.js`) is the control center:**
-- It specifies which extensions to load (image rendering, UI)
-- It specifies which modes to use (viewing experience)
-- It specifies data sources (where images come from)
-- It customizes UI and branding
+### Class Mapping
 
-**Everything else is pre-built:**
-- Extensions are in `node_modules/@ohif/extension-*`
-- Modes are in `node_modules/@ohif/mode-*`
-- The build system links them together
-- Runtime loads them dynamically
+```
+0: "No DR"
+1: "Mild"
+2: "Moderate"
+3: "Severe"
+4: "Proliferative DR"
+```
 
-**For DR images specifically:**
-- Use `dicomlocal` data source for file uploads
-- Use `@ohif/extension-cornerstone` for rendering
-- Use `@ohif/mode-basic` for simple viewing
-- Enable `showStudyList: true` to allow image selection
+## Explainability Methods
 
+### 1. Grad-CAM++
+
+**Implementation**: `grad-cam` library
+**Output**: Heatmap overlay showing important regions
+**Use Case**: Visual attention visualization
+
+### 2. LIME
+
+**Implementation**: `lime` library with image explainer
+**Output**: Superpixel-based importance map
+**Use Case**: Local interpretability
+
+### 3. SHAP
+
+**Implementation**: Custom implementation
+**Output**: Feature importance visualization
+**Use Case**: Global model interpretability
+
+## Configuration Management
+
+### Backend Config (`src/config.py`)
+
+- Model paths
+- Image preprocessing parameters
+- Device selection
+- Class definitions
+
+### Environment Variables
+
+- API keys (LLM services)
+- Service endpoints
+- Feature flags
+
+## Error Handling
+
+### Backend
+
+- File upload validation
+- Model loading errors
+- Image processing errors
+- Graceful degradation
+
+### Frontend
+
+- Network error handling
+- Invalid file type handling
+- Loading states
+- User-friendly error messages
+
+## Security Considerations
+
+### Current State
+
+- CORS enabled for all origins (should be restricted in production)
+- File upload validation needed
+- No authentication/authorization
+
+### Production Recommendations
+
+- Restrict CORS to frontend domain
+- Add file type and size validation
+- Implement authentication
+- Add rate limiting
+- Sanitize file paths
+- Use HTTPS
+
+## Performance Optimizations
+
+### Backend
+
+- Model caching (loaded once, reused)
+- Async file I/O
+- Efficient image preprocessing
+- Device selection (GPU/MPS acceleration)
+
+### Frontend
+
+- Image compression before upload
+- Lazy loading of overlay images
+- Optimized React rendering
+- Vite for fast builds
+
+## Deployment
+
+### Backend
+
+```bash
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run build
+# Serve dist/ directory with static file server
+```
+
+### Production Considerations
+
+- Use production ASGI server (Gunicorn + Uvicorn workers)
+- Set up reverse proxy (Nginx)
+- Configure static file serving
+- Enable HTTPS
+- Set up monitoring and logging
+
+## Future Enhancements
+
+- [ ] Batch prediction support
+- [ ] Model versioning
+- [ ] User authentication
+- [ ] Database for predictions and feedback
+- [ ] Real-time prediction streaming
+- [ ] Additional explainability methods
+- [ ] Model ensemble support
+- [ ] API rate limiting
+- [ ] Comprehensive test suite
