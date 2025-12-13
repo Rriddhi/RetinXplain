@@ -27,13 +27,14 @@ The clean, modern interface for uploading fundus images with drag-and-drop suppo
 
 Example screening results showing Moderate DR (Grade 2/4) with 89.5% confidence, including clinician summary and patient-friendly explanation.
 
-![Screening Results - Severe](docs/images/results-severe.png)
 
-Example screening results showing Severe DR (Grade 3/4) with urgent referral recommendation.
+![Grad-CAM Visualization](docs/images/gradcam-visualization.png)
+
+Example screening results showing Severe DR (Grade 3/4) with urgent referral recommendation, and Moderate DR (Grade 2/4) with a recommendation to monitor for 3 months. 
 
 ### Explainability Visualization
 
-![Grad-CAM Visualization](docs/images/gradcam-visualization.png)
+![Screening Results - Severe](docs/images/results-severe.png)
 
 Grad-CAM heatmap overlay showing which regions of the fundus image influenced the AI's decision. Red/orange/yellow areas indicate high attention regions, while blue/purple areas show lower attention.
 
@@ -168,9 +169,6 @@ Health check endpoint.
 
 **Grad-CAM (Gradient-weighted Class Activation Mapping)**: Our custom implementation generates heatmaps showing important regions that influenced the model's prediction. The visualization uses a color gradient from blue (low attention) to red/yellow (high attention), allowing clinicians to understand which areas of the fundus image were most significant for the DR classification.
 
-![Grad-CAM Example](docs/images/gradcam-visualization.png)
-
-The heatmap clearly highlights pathological regions such as hemorrhages, exudates, and microaneurysms that contribute to the model's decision, providing transparency and interpretability for clinical use.
 
 ## Development
 
